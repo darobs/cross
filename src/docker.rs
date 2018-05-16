@@ -140,7 +140,7 @@ pub fn run(target: &Target,
         .args(&["-v", &format!("{}:/target", target_dir.display())])
         .args(&["-w", "/project"])
         .args(&["-i", &image(toml, target)?])
-        .args(&["sh", "-c", &format!("PATH=$PATH:/rust/bin {:?}", cmd)])
+        .args(&["sh", "-c", &format!("PATH=$PATH:/rust/bin:/cargo/bin {:?}", cmd)])
         .run_and_get_status(verbose)
 }
 
