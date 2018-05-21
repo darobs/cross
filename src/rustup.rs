@@ -16,16 +16,18 @@ impl AvailableTargets {
 }
 
 pub fn available_targets(verbose: bool) -> Result<AvailableTargets> {
-    let out = Command::new("rustup").args(&["target", "list"])
+    let out = Command::new("rustup")
+        .args(&["target", "list"])
         .run_and_get_stdout(verbose)?;
 
     Ok(AvailableTargets {
         triples: out.lines()
-            .filter_map(|line| if line.contains("installed") ||
-                                  line.contains("default") {
-                None
-            } else {
-                Some(line.to_owned())
+            .filter_map(|line| {
+                if line.contains("installed") || line.contains("default") {
+                    None
+                } else {
+                    Some(line.to_owned())
+                }
             })
             .collect(),
     })

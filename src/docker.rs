@@ -5,12 +5,12 @@ use std::{env, fs};
 
 use semver::{Version, VersionReq};
 
-use {Target, Toml};
 use cargo::Root;
 use errors::*;
 use extensions::CommandExt;
 use id;
 use rustc;
+use {Target, Toml};
 
 lazy_static! {
     /// Retrieve the Docker Daemon version.
@@ -53,10 +53,10 @@ pub fn register(target: &Target, verbose: bool) -> Result<()> {
     let cmd = if target.is_windows() {
         // https://www.kernel.org/doc/html/latest/admin-guide/binfmt-misc.html
         "mount binfmt_misc -t binfmt_misc /proc/sys/fs/binfmt_misc && \
-            echo ':wine:M::MZ::/usr/bin/run-detectors:' > /proc/sys/fs/binfmt_misc/register"
+         echo ':wine:M::MZ::/usr/bin/run-detectors:' > /proc/sys/fs/binfmt_misc/register"
     } else {
         "apt-get update && apt-get install --no-install-recommends -y \
-            binfmt-support qemu-user-static"
+         binfmt-support qemu-user-static"
     };
     docker_command("run")
         .arg("--privileged")
@@ -67,13 +67,14 @@ pub fn register(target: &Target, verbose: bool) -> Result<()> {
         .run(verbose)
 }
 
-pub fn run(target: &Target,
-           args: &[String],
-           root: &Root,
-           toml: Option<&Toml>,
-           uses_xargo: bool,
-           verbose: bool)
-           -> Result<ExitStatus> {
+pub fn run(
+    target: &Target,
+    args: &[String],
+    root: &Root,
+    toml: Option<&Toml>,
+    uses_xargo: bool,
+    verbose: bool,
+) -> Result<ExitStatus> {
     let root = root.path();
     let home_dir = env::home_dir().ok_or_else(|| "couldn't get home directory. Is $HOME not set?")?;
     let cargo_dir = env::var_os("CARGO_HOME")
@@ -93,18 +94,26 @@ pub fn run(target: &Target,
     let mut cmd = if uses_xargo {
         Command::new("xargo")
     } else {
-        Command::new("cargo")
+        Command::new("/cargo/bin/cargo")
     };
     cmd.args(args);
 
     // We create/regenerate the lockfile on the host system because the Docker
     // container doesn't have write access to the root of the Cargo project
     let cargo_toml = root.join("Cargo.toml");
-    Command::new("cargo").args(&["fetch",
-                "--manifest-path",
-                &cargo_toml.display().to_string()])
+    Command::new("cargo")
+        .args(&[
+            "fetch",
+            "--manifest-path",
+            &cargo_toml.display().to_string(),
+        ])
         .run(verbose)
         .chain_err(|| "couldn't generate Cargo.lock")?;
+
+    Command::new("echo")
+        .args(&[format!("\"{}\"", cargo_dir.display())])
+        .run(verbose)
+        .chain_err(|| "couldn't echo cargo_dir")?;
 
     let mut docker = docker_command("run");
 
@@ -146,17 +155,16 @@ pub fn run(target: &Target,
 
 fn image(toml: Option<&Toml>, target: &Target) -> Result<String> {
     Ok(if let Some(toml) = toml {
-            toml.image(target)?.map(|s| s.to_owned())
+        toml.image(target)?.map(|s| s.to_owned())
+    } else {
+        None
+    }.unwrap_or_else(|| {
+        let version = env!("CARGO_PKG_VERSION");
+        let tag = if version.ends_with("-dev") {
+            Cow::from("latest")
         } else {
-            None
-        }
-        .unwrap_or_else(|| {
-            let version = env!("CARGO_PKG_VERSION");
-            let tag = if version.ends_with("-dev") {
-                Cow::from("latest")
-            } else {
-                Cow::from(format!("v{}", version))
-            };
-            format!("japaric/{}:{}", target.triple(), tag)
-        }))
+            Cow::from(format!("v{}", version))
+        };
+        format!("japaric/{}:{}", target.triple(), tag)
+    }))
 }
