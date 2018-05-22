@@ -110,8 +110,8 @@ pub fn run(
         .run(verbose)
         .chain_err(|| "couldn't generate Cargo.lock")?;
 
-    Command::new("echo")
-        .args(&[format!("\"{}\"", cargo_dir.display())])
+    Command::new("ls")
+        .args(&["-al", &cargo_dir.display().to_string()])
         .run(verbose)
         .chain_err(|| "couldn't echo cargo_dir")?;
 
@@ -149,7 +149,7 @@ pub fn run(
         .args(&["-v", &format!("{}:/target", target_dir.display())])
         .args(&["-w", "/project"])
         .args(&["-i", &image(toml, target)?])
-        .args(&["sh", "-c", &format!("PATH=$PATH:/rust/bin:/cargo/bin echo $PATH && echo \"ls -al /cargo/bin\" && ls -al /cargo/bin && echo \"ls -al /rust/bin\" && ls -al /rust/bin && echo \"{:?}\" && {:?}", cmd, cmd)])
+        .args(&["sh", "-c", &format!("PATH=$PATH:/rust/bin:/cargo/bin echo $PATH && echo \"ls -al /cargo\" && ls -al /cargo && echo \"ls -al /cargo/bin\" && ls -al /cargo/bin && echo \"ls -al /rust/bin\" && ls -al /rust/bin && echo \"{:?}\" && {:?}", cmd, cmd)])
         .run_and_get_status(verbose)
 }
 
