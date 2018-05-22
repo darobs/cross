@@ -88,7 +88,7 @@ pub fn run(
     // create the directories we are going to mount before we mount them,
     // otherwise `docker` will create them but they will be owned by `root`
     fs::create_dir(&target_dir).ok();
-    fs::create_dir(&cargo_dir).ok();
+    // fs::create_dir(&cargo_dir).ok();
     fs::create_dir(&xargo_dir).ok();
 
     let mut cmd = if uses_xargo {
@@ -143,7 +143,8 @@ pub fn run(
     docker
         .args(&["-e", "XARGO_HOME=/xargo"])
         .args(&["-v", &format!("{}:/xargo", xargo_dir.display())])
-        .args(&["-v", &format!("{}:/cargo", cargo_dir.display())])
+        // .args(&["-v", &format!("{}:/cargo", cargo_dir.display())])
+        .args(&["-v", "/root/.cargo:/cargo"])
         .args(&["-v", &format!("{}:/project:ro", root.display())])
         .args(&["-v", &format!("{}:/rust:ro", rustc::sysroot(verbose)?.display())])
         .args(&["-v", &format!("{}:/target", target_dir.display())])
