@@ -111,6 +111,7 @@ pub fn run(
         .chain_err(|| "couldn't generate Cargo.lock")?;
 
     println!("cargo_dir: {}", cargo_dir.display());
+    println!("ls -al {}", cargo_dir.display());
     Command::new("ls")
         .args(&["-al", &cargo_dir.display().to_string()])
         .run(verbose)
@@ -141,6 +142,7 @@ pub fn run(
         }
     }
 
+    println!("bind: --mount type=bind,src={},dst=/cargo", cargo_dir.display());
     docker
         .args(&["-e", "XARGO_HOME=/xargo"])
         .args(&["-v", &format!("{}:/xargo", xargo_dir.display())])
