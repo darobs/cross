@@ -110,6 +110,7 @@ pub fn run(
         .run(verbose)
         .chain_err(|| "couldn't generate Cargo.lock")?;
 
+    println!("cargo_dir: {}", cargo_dir.display());
     Command::new("ls")
         .args(&["-al", &cargo_dir.display().to_string()])
         .run(verbose)
@@ -143,8 +144,7 @@ pub fn run(
     docker
         .args(&["-e", "XARGO_HOME=/xargo"])
         .args(&["-v", &format!("{}:/xargo", xargo_dir.display())])
-        // .args(&["-v", &format!("{}:/cargo", cargo_dir.display())])
-        .args(&["-v", "/root/.cargo:/cargo"])
+        .args(&["--mount", &format!("type=bind,src={},dst=/cargo/", cargo_dir.display())])
         .args(&["-v", &format!("{}:/project:ro", root.display())])
         .args(&["-v", &format!("{}:/rust:ro", rustc::sysroot(verbose)?.display())])
         .args(&["-v", &format!("{}:/target", target_dir.display())])
