@@ -77,6 +77,9 @@ pub fn run(
 ) -> Result<ExitStatus> {
     let root = root.path();
     let home_dir = env::home_dir().ok_or_else(|| "couldn't get home directory. Is $HOME not set?")?;
+    let rustup_dir = env::var_os("RUSTUP_HOME")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| home_dir.join(".rustup"));
     let cargo_dir = env::var_os("CARGO_HOME")
         .map(PathBuf::from)
         .unwrap_or_else(|| home_dir.join(".cargo"));
@@ -89,6 +92,7 @@ pub fn run(
     // otherwise `docker` will create them but they will be owned by `root`
     fs::create_dir(&target_dir).ok();
     fs::create_dir(&cargo_dir).ok();
+    fs::create_dir(&rustup_dir).ok();
     fs::create_dir(&xargo_dir).ok();
 
     let mut cmd = if uses_xargo {
@@ -122,6 +126,7 @@ pub fn run(
     docker
         .arg("--rm")
         .args(&["--user", &format!("{}:{}", id::user(), id::group())])
+        .args(&["-e", "RUSTUP_HOME=/rust"])
         .args(&["-e", "CARGO_HOME=/cargo"])
         .args(&["-e", "CARGO_TARGET_DIR=/target"])
         .args(&["-e", &format!("USER={}", id::username())]);
@@ -149,7 +154,8 @@ pub fn run(
         .args(&["-v", &format!("{}:/xargo", xargo_dir.display())])
         .args(&["--mount", &format!("type=bind,src={},dst=/cargo/", cargo_dir.display())])
         .args(&["-v", &format!("{}:/project:ro", root.display())])
-        .args(&["-v", &format!("{}:/rust:ro", rustc::sysroot(verbose)?.display())])
+        // .args(&["-v", &format!("{}:/rust:ro", rustc::sysroot(verbose)?.display())])
+        .args(&["-v", &format!("{}:/rust:ro", rustup_dir.display())])
         .args(&["-v", &format!("{}:/target", target_dir.display())])
         .args(&["-w", "/project"])
         .args(&["-i", &image(toml, target)?])
