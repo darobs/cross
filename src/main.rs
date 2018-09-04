@@ -46,7 +46,9 @@ impl Host {
     /// `target == None` means `target == host`
     fn is_supported(&self, target: Option<&Target>) -> bool {
         if *self == Host::X86_64AppleDarwin {
-            target.map(|t| *t == Target::I686AppleDarwin).unwrap_or(false)
+            target
+                .map(|t| *t == Target::I686AppleDarwin)
+                .unwrap_or(false)
         } else if *self == Host::X86_64UnknownLinuxGnu {
             target.map(|t| t.needs_docker()).unwrap_or(true)
         } else {
@@ -141,10 +143,10 @@ pub enum Target {
 impl Target {
     fn is_bare_metal(&self) -> bool {
         match *self {
-            Target::Thumbv6mNoneEabi |
-            Target::Thumbv7emNoneEabi |
-            Target::Thumbv7emNoneEabihf |
-            Target::Thumbv7mNoneEabi => true,
+            Target::Thumbv6mNoneEabi
+            | Target::Thumbv7emNoneEabi
+            | Target::Thumbv7emNoneEabihf
+            | Target::Thumbv7mNoneEabi => true,
             _ => false,
         }
     }
@@ -158,62 +160,60 @@ impl Target {
 
     fn is_bsd(&self) -> bool {
         match *self {
-            Target::I686UnknownFreebsd |
-            Target::X86_64UnknownDragonfly |
-            Target::X86_64UnknownFreebsd |
-            Target::X86_64UnknownNetbsd => true,
+            Target::I686UnknownFreebsd
+            | Target::X86_64UnknownDragonfly
+            | Target::X86_64UnknownFreebsd
+            | Target::X86_64UnknownNetbsd => true,
             _ => false,
         }
     }
 
     fn is_solaris(&self) -> bool {
         match *self {
-            Target::Sparcv9SunSolaris |
-            Target::X86_64SunSolaris => true,
+            Target::Sparcv9SunSolaris | Target::X86_64SunSolaris => true,
             _ => false,
         }
     }
 
     fn is_android(&self) -> bool {
         match *self {
-            Target::ArmLinuxAndroideabi |
-            Target::Armv7LinuxAndroideabi |
-            Target::Aarch64LinuxAndroid |
-            Target::I686LinuxAndroid |
-            Target::X86_64LinuxAndroid => true,
+            Target::ArmLinuxAndroideabi
+            | Target::Armv7LinuxAndroideabi
+            | Target::Aarch64LinuxAndroid
+            | Target::I686LinuxAndroid
+            | Target::X86_64LinuxAndroid => true,
             _ => false,
         }
     }
 
     fn is_emscripten(&self) -> bool {
         match *self {
-            Target::AsmjsUnknownEmscripten |
-            Target::Wasm32UnknownEmscripten => true,
+            Target::AsmjsUnknownEmscripten | Target::Wasm32UnknownEmscripten => true,
             _ => false,
         }
     }
 
     fn is_linux(&self) -> bool {
         match *self {
-            Target::Aarch64UnknownLinuxGnu |
-            Target::ArmUnknownLinuxGnueabi |
-            Target::ArmUnknownLinuxMusleabi |
-            Target::Armv7UnknownLinuxGnueabihf |
-            Target::Armv7UnknownLinuxMusleabihf |
-            Target::I586UnknownLinuxGnu |
-            Target::I686UnknownLinuxGnu |
-            Target::I686UnknownLinuxMusl |
-            Target::Mips64UnknownLinuxGnuabi64 |
-            Target::Mips64elUnknownLinuxGnuabi64 |
-            Target::MipsUnknownLinuxGnu |
-            Target::MipselUnknownLinuxGnu |
-            Target::Powerpc64UnknownLinuxGnu |
-            Target::Powerpc64leUnknownLinuxGnu |
-            Target::PowerpcUnknownLinuxGnu |
-            Target::S390xUnknownLinuxGnu |
-            Target::Sparc64UnknownLinuxGnu |
-            Target::X86_64UnknownLinuxGnu |
-            Target::X86_64UnknownLinuxMusl => true,
+            Target::Aarch64UnknownLinuxGnu
+            | Target::ArmUnknownLinuxGnueabi
+            | Target::ArmUnknownLinuxMusleabi
+            | Target::Armv7UnknownLinuxGnueabihf
+            | Target::Armv7UnknownLinuxMusleabihf
+            | Target::I586UnknownLinuxGnu
+            | Target::I686UnknownLinuxGnu
+            | Target::I686UnknownLinuxMusl
+            | Target::Mips64UnknownLinuxGnuabi64
+            | Target::Mips64elUnknownLinuxGnuabi64
+            | Target::MipsUnknownLinuxGnu
+            | Target::MipselUnknownLinuxGnu
+            | Target::Powerpc64UnknownLinuxGnu
+            | Target::Powerpc64leUnknownLinuxGnu
+            | Target::PowerpcUnknownLinuxGnu
+            | Target::S390xUnknownLinuxGnu
+            | Target::Sparc64UnknownLinuxGnu
+            | Target::X86_64UnknownLinuxGnu
+            | Target::X86_64UnknownLinuxMusl => true,
             _ => false,
         }
     }
@@ -227,22 +227,22 @@ impl Target {
     }
 
     fn needs_docker(&self) -> bool {
-        self.is_linux() || self.is_android() || self.is_bare_metal() || self.is_bsd() ||
-        self.is_solaris() || !self.is_builtin() || self.is_windows() || self.is_emscripten()
+        self.is_linux() || self.is_android() || self.is_bare_metal() || self.is_bsd()
+            || self.is_solaris() || !self.is_builtin() || self.is_windows()
+            || self.is_emscripten()
     }
 
     fn needs_interpreter(&self) -> bool {
         let not_native = match *self {
             Target::Custom { ref triple } => {
-                return !triple.starts_with("x86_64") &&
-                       !triple.starts_with("i586") &&
-                       !triple.starts_with("i686")
+                return !triple.starts_with("x86_64") && !triple.starts_with("i586")
+                    && !triple.starts_with("i686")
             }
-            Target::I586UnknownLinuxGnu |
-            Target::I686UnknownLinuxGnu |
-            Target::I686UnknownLinuxMusl |
-            Target::X86_64UnknownLinuxGnu |
-            Target::X86_64UnknownLinuxMusl => false,
+            Target::I586UnknownLinuxGnu
+            | Target::I686UnknownLinuxGnu
+            | Target::I686UnknownLinuxMusl
+            | Target::X86_64UnknownLinuxGnu
+            | Target::X86_64UnknownLinuxMusl => false,
             _ => true,
         };
 
@@ -350,7 +350,9 @@ impl Target {
             "x86_64-unknown-linux-musl" => X86_64UnknownLinuxMusl,
             "x86_64-unknown-netbsd" => X86_64UnknownNetbsd,
             _ if target_list.contains(triple) => Other,
-            _ => Custom { triple: triple.to_owned() },
+            _ => Custom {
+                triple: triple.to_owned(),
+            },
         }
     }
 }
@@ -386,9 +388,7 @@ pub fn main() {
                     writeln!(stderr, "{:?}", backtrace).ok();
                 }
             } else {
-                writeln!(stderr,
-                         "note: run with `RUST_BACKTRACE=1` for a backtrace")
-                    .ok();
+                writeln!(stderr, "note: run with `RUST_BACKTRACE=1` for a backtrace").ok();
             }
 
             process::exit(1)
@@ -405,16 +405,19 @@ fn run() -> Result<ExitStatus> {
     let target_list = rustc::target_list(false)?;
     let args = cli::parse(&target_list);
 
-    if args.all.iter().any(|a| a == "--version" || a == "-V") &&
-       args.subcommand.is_none() {
-        println!(concat!("cross ", env!("CARGO_PKG_VERSION"), "{}"),
-                 include_str!(concat!(env!("OUT_DIR"), "/commit-info.txt")));
+    if args.all.iter().any(|a| a == "--version" || a == "-V") && args.subcommand.is_none() {
+        println!(
+            concat!("cross ", env!("CARGO_PKG_VERSION"), "{}"),
+            include_str!(concat!(env!("OUT_DIR"), "/commit-info.txt"))
+        );
     }
 
-    let verbose =
-        args.all.iter().any(|a| a == "--verbose" || a == "-v" || a == "-vv");
+    let verbose = args.all
+        .iter()
+        .any(|a| a == "--verbose" || a == "-v" || a == "-vv");
 
-    let version_meta = rustc_version::version_meta().chain_err(|| "couldn't fetch the `rustc` version")?;
+    let version_meta =
+        rustc_version::version_meta().chain_err(|| "couldn't fetch the `rustc` version")?;
     if let Some(root) = cargo::root()? {
         let host = version_meta.host();
 
@@ -423,14 +426,12 @@ fn run() -> Result<ExitStatus> {
                 .unwrap_or(Target::from(host.triple(), &target_list));
             let toml = toml(&root)?;
             let uses_xargo = if let Some(toml) = toml.as_ref() {
-                    toml.xargo(&target)?
-                } else {
-                    None
-                }
-                .unwrap_or_else(|| target.needs_xargo());
+                toml.xargo(&target)?
+            } else {
+                None
+            }.unwrap_or_else(|| target.needs_xargo());
 
-            if !uses_xargo &&
-               rustup::available_targets(verbose)?.contains(&target) {
+            if !uses_xargo && rustup::available_targets(verbose)?.contains(&target) {
                 rustup::install(&target, verbose)?;
             }
 
@@ -438,21 +439,25 @@ fn run() -> Result<ExitStatus> {
                 rustup::install_rust_src(verbose)?;
             }
 
-            if target.needs_docker() &&
-               args.subcommand.map(|sc| sc.needs_docker()).unwrap_or(false) {
-                if version_meta.needs_interpreter() &&
-                    args.subcommand.map(|sc| sc.needs_interpreter()).unwrap_or(false) &&
-                    target.needs_interpreter() &&
-                    !interpreter::is_registered(&target)? {
-                        docker::register(&target, verbose)?
+            if target.needs_docker() && args.subcommand.map(|sc| sc.needs_docker()).unwrap_or(false)
+            {
+                if version_meta.needs_interpreter()
+                    && args.subcommand
+                        .map(|sc| sc.needs_interpreter())
+                        .unwrap_or(false) && target.needs_interpreter()
+                    && !interpreter::is_registered(&target)?
+                {
+                    docker::register(&target, verbose)?
                 }
 
-                return docker::run(&target,
-                                   &args.all,
-                                   &root,
-                                   toml.as_ref(),
-                                   uses_xargo,
-                                   verbose);
+                return docker::run(
+                    &target,
+                    &args.all,
+                    &root,
+                    toml.as_ref(),
+                    uses_xargo,
+                    verbose,
+                );
             }
         }
     }
@@ -470,12 +475,10 @@ impl Toml {
     pub fn image(&self, target: &Target) -> Result<Option<&str>> {
         let triple = target.triple();
 
-        if let Some(value) = self.table
-            .lookup(&format!("target.{}.image", triple)) {
-            Ok(Some(value.as_str()
-                .ok_or_else(|| {
-                    format!("target.{}.image must be a string", triple)
-                })?))
+        if let Some(value) = self.table.lookup(&format!("target.{}.image", triple)) {
+            Ok(Some(value.as_str().ok_or_else(|| {
+                format!("target.{}.image must be a string", triple)
+            })?))
         } else {
             Ok(None)
         }
@@ -486,16 +489,15 @@ impl Toml {
         let triple = target.triple();
 
         if let Some(value) = self.table.lookup("build.xargo") {
-            return Ok(Some(value.as_bool()
+            return Ok(Some(value
+                .as_bool()
                 .ok_or_else(|| "build.xargo must be a boolean")?));
         }
 
-        if let Some(value) = self.table
-            .lookup(&format!("target.{}.xargo", triple)) {
-            Ok(Some(value.as_bool()
-                .ok_or_else(|| {
-                    format!("target.{}.xargo must be a boolean", triple)
-                })?))
+        if let Some(value) = self.table.lookup(&format!("target.{}.xargo", triple)) {
+            Ok(Some(value.as_bool().ok_or_else(|| {
+                format!("target.{}.xargo must be a boolean", triple)
+            })?))
         } else {
             Ok(None)
         }
@@ -519,7 +521,7 @@ impl Toml {
                     bail!("every build.env.passthrough element must be a string");
                 }
                 Ok(vec.iter().map(|val| val.as_str().unwrap()).collect())
-            },
+            }
             _ => Ok(Vec::new()),
         }
     }
@@ -536,7 +538,7 @@ impl Toml {
                     bail!("every {} element must be a string", key);
                 }
                 Ok(vec.iter().map(|val| val.as_str().unwrap()).collect())
-            },
+            }
             _ => Ok(Vec::new()),
         }
     }
@@ -548,10 +550,9 @@ fn toml(root: &Root) -> Result<Option<Toml>> {
 
     if path.exists() {
         Ok(Some(Toml {
-            table: Value::Table(Parser::new(&file::read(&path)?).parse()
-                .ok_or_else(|| {
-                    format!("couldn't parse {} as TOML", path.display())
-                })?),
+            table: Value::Table(Parser::new(&file::read(&path)?)
+                .parse()
+                .ok_or_else(|| format!("couldn't parse {} as TOML", path.display()))?),
         }))
     } else {
         Ok(None)

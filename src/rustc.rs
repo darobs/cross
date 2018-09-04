@@ -42,10 +42,8 @@ pub fn target_list(verbose: bool) -> Result<TargetList> {
     Command::new("rustc")
         .args(&["--print", "target-list"])
         .run_and_get_stdout(verbose)
-        .map(|s| {
-            TargetList {
-                triples: s.lines().map(|l| l.to_owned()).collect(),
-            }
+        .map(|s| TargetList {
+            triples: s.lines().map(|l| l.to_owned()).collect(),
         })
 }
 
