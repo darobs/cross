@@ -147,7 +147,8 @@ pub fn run(
         }
     }
 
-    println!("bind: --mount type=bind,src={},dst=/cargo", cargo_dir.display());
+    println!("DAVES ATTEMPTED FIX");
+    println!("bind: --v type=bind,src={},dst=/cargo", cargo_dir.display());
     println!("/rust: {}", rustc::sysroot(verbose)?.display());
     docker
         .args(&["-e", "XARGO_HOME=/xargo"])
