@@ -152,7 +152,7 @@ pub fn run(
     docker
         .args(&["-e", "XARGO_HOME=/xargo"])
         .args(&["-v", &format!("{}:/xargo", xargo_dir.display())])
-        .args(&["--mount", &format!("type=bind,src={},dst=/cargo/", cargo_dir.display())])
+        .args(&["-v", &format!("type=bind,src={},dst=/cargo/", cargo_dir.display())])
         .args(&["-v", &format!("{}:/project:ro", root.display())])
         // .args(&["-v", &format!("{}:/rust:ro", rustc::sysroot(verbose)?.display())])
         .args(&["-v", &format!("{}:/rust:ro", rustup_dir.display())])
